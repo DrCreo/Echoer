@@ -1,11 +1,11 @@
 // A new 'config.json' will be generated when you run the bot for the first time, so don't edit this one.
 {
-  "token": "<token>", // The token for your discord bot you should be able to get one here https://discordapp.com/developers/applications/me
-  "echo-channel-id": 0, // The Id of the channel you want images to be echoed to. 
-  "art-channel-id": 0, // The Id of the channel you want the bot to watch for your reactions in.
-  "reaction-emoji-id": 0, // The Id of the emote/emoji you want to trigger the echo when reacting.
-  "needed-perm": 16, // The needed perm for the reaction to trigger the echo default is 16 which is manage channels. you can find the values for each perm here: https://discordapi.com/permissions.html#0
-  "echoed-cache": 25, // The amount of cached echos this is so multiple reactions by different people with the right perms doesn't lead to duplicate echos.
-  "embed_color_hex": "#aa8bc9", // Hex code for the color you wish the embed to be.
-  "status": "out for great art!" // The status of the bot by default its "Watching out for great art!".
+  "token": "<token>",                 // The token for your discord bot you should be able to get one here https://discordapp.com/developers/applications/me
+  "echo-channel-id": 0,               // The Id of the channel you want images to be echoed to. 
+  "art-channel-id": 0,                // The Id of the channel you want the bot to watch for your reactions in.
+  "reaction-emoji-id": 0,             // The Id of the emote/emoji you want to trigger the echo when reacting.
+  "needed-perm": 16,                  // The needed perm for the reaction to trigger the echo default is 16 which is manage channels. you can find the values for each perm here: https://discordapi.com/permissions.html#0
+  "echoed-cache": 25,                 // The amount of cached echos this is so multiple reactions by different people with the right perms doesn't lead to duplicate echos.
+  "embed_color_hex": "#aa8bc9",       // Hex code for the color you wish the embed to be.
+  "status": "out for great art!"      // The status of the bot by default its "Watching out for great art!".
 }
