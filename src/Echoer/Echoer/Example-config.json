@@ -1,0 +1,10 @@
+{
+  "token": "<token>",
+  "echo-channel-id": 0,
+  "art-channel-id": 0,
+  "reaction-emoji-id": 0,
+  "needed-perm": 16,
+  "echoed-cache": 25,
+  "embed_color_hex": "#aa8bc9",
+  "status": "out for great art!"
+}
