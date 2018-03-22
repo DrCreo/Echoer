@@ -4,9 +4,12 @@ using DSharpPlus.EventArgs;
 using Echoer.Models;
 using Newtonsoft.Json;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static DSharpPlus.Entities.DiscordEmbedBuilder;
 
@@ -27,7 +30,7 @@ namespace Echoer
             await InitaliazeClientAsync();
 
             // initialize the echo cache and specify its size
-            EchoedCache = new RingBuffer<ulong>(Config.EchoedCache);
+            await LoadCache();
 
             // cache channels
             EchoChannel = await Client.GetChannelAsync(Config.EchoChannelID);
@@ -92,12 +95,23 @@ namespace Echoer
                 return;
             }
 
+
+            // if we dont have attachments check the the message for links
+            if (msg.Attachments.Count == 0)
+            {
+                MatchCollection ms = Regex.Matches(msg.Content, @"(www.+|http.+)([\s]|$)");
+                if (ms.Count > 0 && IsImageUrl(ms[0].Value.ToString()))
+                    imageUrl = ms[0].Value.ToString();
+            }
+
+
             switch (imageUrl)
             {
                 // if theres no attachments just send the message content
                 // TODO: in the future check to see if there are any links and try grabing the images from them
                 //       and display said image in the embed.
                 case "":
+
                     var eb = new DiscordEmbedBuilder
                     {
                         Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
@@ -107,12 +121,11 @@ namespace Echoer
                             Text = msg.Timestamp.ToString(),
                             IconUrl = artPoster.AvatarUrl
                         },
-                        Color = new DiscordColor(Config.EmbedColor),
+                        Color = new DiscordColor(Config.EmbedColor)
                     };
                     await Client.SendMessageAsync(EchoChannel, "", false, eb);
 
-                    // add the messageid to the cache
-                    EchoedCache.Add(e.Message.Id);
+                    AddToCache(msg.Id);
                     break;
 
                 // sen a normal embed with a image.
@@ -131,11 +144,21 @@ namespace Echoer
                     };
 
                     await Client.SendMessageAsync(EchoChannel, "", false, ebImage);
-                    
+
                     // add the messageid to the cache
-                    EchoedCache.Add(msg.Id);
+                    AddToCache(msg.Id);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Adds a message id to cache and saves the cache
+        /// </summary>
+        /// <param name="msgId"></param>
+        private void AddToCache(ulong msgId)
+        {
+            EchoedCache.Add(msgId);
+            SaveCache();
         }
 
 
@@ -192,6 +215,71 @@ namespace Echoer
                 json = await sr.ReadToEndAsync();
 
             return JsonConvert.DeserializeObject<Config>(json);
+        }
+
+        bool IsImageUrl(string URL)
+        {
+            try
+            {
+                var req = (HttpWebRequest)HttpWebRequest.Create(URL);
+                req.Method = "HEAD";
+                using (var resp = req.GetResponse())
+                {
+                    return resp.ContentType.ToLower(CultureInfo.InvariantCulture)
+                               .StartsWith("image/");
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Save cache
+        /// </summary>
+        /// <returns></returns>
+        public void SaveCache()
+        {
+            var json = JsonConvert.SerializeObject(EchoedCache, Formatting.Indented);
+            File.WriteAllText("cache", json);
+            return;
+        }
+
+        /// <summary>
+        /// Loads cache from file.
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadCache()
+        {
+            var json = "{}";
+            var utf8 = new UTF8Encoding(false);
+            var fi = new FileInfo("cache");
+
+            // if the file doesnt exist return a empty cache.
+            if (!fi.Exists)
+            {
+                EchoedCache = new RingBuffer<ulong>(Config.EchoedCache);
+                return;
+            }
+
+            using (var fs = fi.OpenRead())
+            using (var sr = new StreamReader(fs, utf8))
+                json = await sr.ReadToEndAsync();
+
+            var tmpCache = JsonConvert.DeserializeObject<RingBuffer<ulong>>(json);
+            if (tmpCache.Count == Config.EchoedCache)
+                EchoedCache = tmpCache;
+            else
+            {
+                EchoedCache = new RingBuffer<ulong>(Config.EchoedCache);
+                foreach (var i in tmpCache)
+                {
+                    if (i != 0)
+                    EchoedCache.Add(i);
+                }
+            }
+            return;
         }
     }
 }
