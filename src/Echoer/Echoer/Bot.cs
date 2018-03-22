@@ -55,7 +55,7 @@ namespace Echoer
                 return;
 
             // check to see if this is the emote we echo to.
-            if (e.Emoji.Id != Config.ReactionEmojiID)
+            if (!Config.ReactionEmojiIDs.Contains(e.Emoji.Id))
                 return;
 
             // get the memver and the perms
@@ -80,6 +80,18 @@ namespace Echoer
             if (imageUrl == null)
                 imageUrl = "";
 
+            DiscordMember artPoster = null;
+
+            try
+            {
+                artPoster = await ArtChannel.Guild.GetMemberAsync(msg.Author.Id);
+            }
+            catch
+            {
+                Console.WriteLine("That user is nolonger present in this server.");
+                return;
+            }
+
             switch (imageUrl)
             {
                 // if theres no attachments just send the message content
@@ -88,7 +100,7 @@ namespace Echoer
                 case "":
                     var eb = new DiscordEmbedBuilder
                     {
-                        Title = $"Some amazing art by {member.DisplayName}! ({member.Username}#{member.Discriminator})",
+                        Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
                         Description = msg.Content,
                         Footer = new EmbedFooter
                         {
@@ -107,7 +119,7 @@ namespace Echoer
                 default:
                     var ebImage = new DiscordEmbedBuilder
                     {
-                        Title = $"Some amazing art by {member.DisplayName}! ({member.Username}#{member.Discriminator})",
+                        Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
                         Description = msg.Content,
                         ImageUrl = imageUrl,
                         Footer = new EmbedFooter
@@ -162,7 +174,7 @@ namespace Echoer
             var fi = new FileInfo("config.json");
             if (!fi.Exists)
             {
-                Console.WriteLine("loading settings failed.");
+                Console.WriteLine("loading Config failed.");
 
                 json = JsonConvert.SerializeObject(Config.DefualtConfig, Formatting.Indented);
                 using (var fs = fi.Create())

@@ -18,8 +18,8 @@ namespace Echoer.Models
         [JsonProperty("art-channel-id")]
         public ulong ArtChannelID { get; private set; }
 
-        [JsonProperty("reaction-emoji-id")]
-        public ulong ReactionEmojiID { get; private set; }
+        [JsonProperty("reaction-emoji-ids")]
+        public List<ulong> ReactionEmojiIDs { get; private set; }
 
         [JsonProperty("needed-perm")]
         public Permissions NeededPerm { get; private set; }
@@ -42,7 +42,7 @@ namespace Echoer.Models
                     Token = "<token>",
                     EchoChannelID   = 0000,
                     ArtChannelID    = 0000,
-                    ReactionEmojiID = 0000,
+                    ReactionEmojiIDs = new List<ulong>(),
                     NeededPerm = Permissions.ManageChannels,
                     EchoedCache = 25,
                     Status = "out for great art!" 
