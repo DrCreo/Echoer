@@ -105,7 +105,7 @@ namespace Echoer
                         Footer = new EmbedFooter
                         {
                             Text = msg.Timestamp.ToString(),
-                            IconUrl = member.AvatarUrl
+                            IconUrl = artPoster.AvatarUrl
                         },
                         Color = new DiscordColor(Config.EmbedColor),
                     };
@@ -125,7 +125,7 @@ namespace Echoer
                         Footer = new EmbedFooter
                         {
                             Text = msg.Timestamp.ToString(),
-                            IconUrl = member.AvatarUrl
+                            IconUrl = artPoster.AvatarUrl
                         },
                         Color = new DiscordColor("#" + Config.EmbedColor),
                     };
