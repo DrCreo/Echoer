@@ -25,10 +25,10 @@ namespace Echoer
 
         internal async Task StartAsync()
         {
-
             // initialize the discord client
             await InitaliazeClientAsync();
-
+            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Initializing", DateTime.Now);
+         
             // initialize the echo cache and specify its size
             await LoadCache();
 
@@ -40,8 +40,12 @@ namespace Echoer
             Client.MessageReactionAdded += Client_MessageReactionAddedAsync;
             Client.Ready += Client_ReadyAsync;
 
+            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Connecting", DateTime.Now);
+            
             // connect the client
             await Client.ConnectAsync().ConfigureAwait(false);
+
+            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Connected", DateTime.Now);
 
             // block 
             await Task.Delay(-1);
@@ -49,6 +53,8 @@ namespace Echoer
 
         private async Task Client_ReadyAsync(ReadyEventArgs e)
         {
+            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Ready!", DateTime.Now);
+
             await Client.UpdateStatusAsync(new DiscordActivity(Config.Status, ActivityType.Watching));
         }
 
@@ -89,9 +95,11 @@ namespace Echoer
             {
                 artPoster = await ArtChannel.Guild.GetMemberAsync(msg.Author.Id);
             }
-            catch
+            catch (Exception exc)
             {
-                Console.WriteLine("That user is nolonger present in this server.");
+                new LogWriter($"{exc.Message}\n{exc.StackTrace}\n\nAuthor ID:{msg.Author.Id}");
+                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", exc.Message, DateTime.Now);
+                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", "That user is nolonger present in this server" , DateTime.Now);
                 return;
             }
 
@@ -104,51 +112,59 @@ namespace Echoer
                     imageUrl = ms[0].Value.ToString();
             }
 
+            try{
+                switch (imageUrl)
+                {
+                    // if theres no attachments just send the message content
+                    // TODO: in the future check to see if there are any links and try grabing the images from them
+                    //       and display said image in the embed.
+                    case "":
 
-            switch (imageUrl)
-            {
-                // if theres no attachments just send the message content
-                // TODO: in the future check to see if there are any links and try grabing the images from them
-                //       and display said image in the embed.
-                case "":
-
-                    var eb = new DiscordEmbedBuilder
-                    {
-                        Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
-                        Description = msg.Content,
-                        Footer = new EmbedFooter
+                        var eb = new DiscordEmbedBuilder
                         {
-                            Text = msg.Timestamp.ToString(),
-                            IconUrl = artPoster.AvatarUrl
-                        },
-                        Color = new DiscordColor(Config.EmbedColor)
-                    };
-                    await Client.SendMessageAsync(EchoChannel, "", false, eb);
+                            Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
+                            Description = msg.Content,
+                            Footer = new EmbedFooter
+                            {
+                                Text = msg.Timestamp.ToString(),
+                                IconUrl = artPoster.AvatarUrl
+                            },
+                            Color = new DiscordColor(Config.EmbedColor)
+                        };
+                        await Client.SendMessageAsync(EchoChannel, "", false, eb);
 
-                    AddToCache(msg.Id);
-                    break;
+                        AddToCache(msg.Id);
+                        break;
 
-                // sen a normal embed with a image.
-                default:
-                    var ebImage = new DiscordEmbedBuilder
-                    {
-                        Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
-                        Description = msg.Content,
-                        ImageUrl = imageUrl,
-                        Footer = new EmbedFooter
+                    // sen a normal embed with a image.
+                    default:
+                        var ebImage = new DiscordEmbedBuilder
                         {
-                            Text = msg.Timestamp.ToString(),
-                            IconUrl = artPoster.AvatarUrl
-                        },
-                        Color = new DiscordColor("#" + Config.EmbedColor),
-                    };
+                            Title = $"Some amazing art by {artPoster.DisplayName}! ({artPoster.Username}#{artPoster.Discriminator})",
+                            Description = msg.Content,
+                            ImageUrl = imageUrl,
+                            Footer = new EmbedFooter
+                            {
+                                Text = msg.Timestamp.ToString(),
+                                IconUrl = artPoster.AvatarUrl
+                            },
+                            Color = new DiscordColor("#" + Config.EmbedColor),
+                        };
 
-                    await Client.SendMessageAsync(EchoChannel, "", false, ebImage);
+                        await Client.SendMessageAsync(EchoChannel, "", false, ebImage);
 
-                    // add the messageid to the cache
-                    AddToCache(msg.Id);
-                    break;
+                        // add the messageid to the cache
+                        AddToCache(msg.Id);
+                        break;
+                }
             }
+            catch(Exception ex)
+            {
+                new LogWriter($"{ex.Message}\n{ex.StackTrace}");
+                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
+            }
+            new LogWriter($"Messaged echoed.\n{msg.Content}\n{imageUrl}");
+            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", $"Messaged echoed.\n{msg.Content}\n{imageUrl}", DateTime.Now);
         }
 
         /// <summary>
@@ -175,6 +191,7 @@ namespace Echoer
 
                 LargeThreshold = 250,
                 LogLevel = LogLevel.Debug,
+                UseInternalLogHandler = true,
 
                 MessageCacheSize = 2048,
 
@@ -197,7 +214,7 @@ namespace Echoer
             var fi = new FileInfo("config.json");
             if (!fi.Exists)
             {
-                Console.WriteLine("loading Config failed.");
+                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", "loading Config failed.", DateTime.Now);
 
                 json = JsonConvert.SerializeObject(Config.DefualtConfig, Formatting.Indented);
                 using (var fs = fi.Create())
@@ -206,7 +223,7 @@ namespace Echoer
                     await sw.WriteAsync(json);
                     await sw.FlushAsync();
                 }
-                Console.WriteLine($"New settings file generated at '{fi.FullName}'\nPlease edit 'config.json' and then relaunch.");
+                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", $"New settings file generated at '{fi.FullName}'\nPlease edit 'config.json' and then relaunch.", DateTime.Now);
                 Console.ReadLine();
             }
 
@@ -276,7 +293,7 @@ namespace Echoer
                 foreach (var i in tmpCache)
                 {
                     if (i != 0)
-                    EchoedCache.Add(i);
+                        EchoedCache.Add(i);
                 }
             }
             return;
