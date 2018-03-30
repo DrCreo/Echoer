@@ -36,8 +36,6 @@ namespace Echoer.Commands
                     return;
                 }
 
-                await ctx.RespondAsync($"Running `{batName}` disconnecting bot now.");
-                await ctx.Client.DisconnectAsync();
                 System.Diagnostics.Process.Start(bat);
             }
             catch (Exception ex)

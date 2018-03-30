@@ -32,7 +32,7 @@ namespace Echoer
             // initialize the discord client
             await InitaliazeClientAsync();
             Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Initializing", DateTime.Now);
-         
+
             // initialize the echo cache and specify its size
             await LoadCache();
             SetUpCommands();
@@ -46,7 +46,7 @@ namespace Echoer
             Client.Ready += Client_ReadyAsync;
 
             Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Connecting", DateTime.Now);
-            
+
             // connect the client
             await Client.ConnectAsync().ConfigureAwait(false);
 
@@ -128,12 +128,21 @@ namespace Echoer
                 }
 
 
-                // if we dont have attachments check the the message for links
-                if (msg.Attachments.Count == 0)
+                try
                 {
-                    MatchCollection ms = Regex.Matches(msg.Content, @"(www.+|http.+)([\s]|$)");
-                    if (ms.Count > 0 && IsImageUrl(ms[0].Value.ToString()))
-                        imageUrl = ms[0].Value.ToString();
+                    // if we dont have attachments check the the message for links
+                    if (msg.Attachments.Count == 0)
+                    {
+                        MatchCollection ms = Regex.Matches(msg.Content, @"(www.+|http.+)([\s]|$)");
+                        if (ms.Count > 0 && IsImageUrl(ms[0].Value.ToString()))
+                            imageUrl = ms[0].Value.ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    imageUrl = "";
+                    Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
+                    new LogWriter($"{ex.Message}\n{ex.StackTrace}\n\nAuthor ID:{msg.Author.Id}");
                 }
 
                 try
