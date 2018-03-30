@@ -39,8 +39,8 @@ namespace Echoer.Models
         [JsonProperty("whitelisted-userids")]
         public List<ulong> WhiteListedUserIds { get; private set; }
 
-        [JsonProperty("updatebat-path")]
-        public string UpdateBatPath { get; private set; }
+        [JsonProperty("batdirectory-path")]
+        public string BatDiectory { get; private set; }
 
 
         public static Config DefualtConfig
@@ -59,7 +59,7 @@ namespace Echoer.Models
                     Prefix = new List<string>(),
                     WhiteListedUserIds = new List<ulong>(),
                     EmbedColor = DiscordColor.Cyan.ToString(),
-                    UpdateBatPath = ""
+                    BatDiectory = ""
                 };
             }
         }
