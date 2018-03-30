@@ -19,6 +19,8 @@ namespace Echoer.Commands
         {
             var config = ctx.Services.GetService<Config>();
 
+            if (config.UpdateBatPath == "")
+                return;
             System.Diagnostics.Process.Start(config.UpdateBatPath);
             return;
         }
@@ -26,7 +28,6 @@ namespace Echoer.Commands
         [Command("uploadlog"), WhiteListed, Description("uploads the log.")]
         public async Task UploadLog(CommandContext ctx)
         {
-            //var fp = File.Open("log.txt",FileMode.Open);
             await ctx.RespondWithFileAsync("log.txt");
         }
     }
