@@ -33,10 +33,12 @@ namespace Echoer.Commands
                 if (!File.Exists(bat))
                 {
                     await ctx.RespondAsync($"`{bat}`\nDoes not exist.");
+                    return;
                 }
 
+                await ctx.RespondAsync($"Running `{batName}` disconnecting bot now.");
+                await ctx.Client.DisconnectAsync();
                 System.Diagnostics.Process.Start(bat);
-                return;
             }
             catch (Exception ex)
             {
