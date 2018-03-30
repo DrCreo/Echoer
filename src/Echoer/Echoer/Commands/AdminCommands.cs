@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Echoer.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
+using System.Reflection;
 
 namespace Echoer.Commands
 {
@@ -70,7 +71,8 @@ namespace Echoer.Commands
         {
             try
             {
-                await ctx.RespondWithFileAsync("log.txt");
+                var m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                await ctx.RespondWithFileAsync(m_exePath + "\\log.txt");
             }
             catch (Exception ex)
             {

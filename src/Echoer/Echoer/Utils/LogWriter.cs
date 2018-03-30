@@ -19,7 +19,7 @@ public class LogWriter
         m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         try
         {
-            using (StreamWriter w = File.AppendText(/*m_exePath + "\\" + */"log.txt"))
+            using (StreamWriter w = File.AppendText(m_exePath + "\\" + "log.txt"))
             {
                 Log(logMessage, w);
             }
