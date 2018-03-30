@@ -33,6 +33,16 @@ namespace Echoer.Models
         [JsonProperty("status")]
         public string Status { get; private set; }
 
+        [JsonProperty("prefix")]
+        public List<string> Prefix { get; private set; }
+
+        [JsonProperty("whitelisted-userids")]
+        public List<ulong> WhiteListedUserIds { get; private set; }
+
+        [JsonProperty("updatebat-path")]
+        public string UpdateBatPath { get; private set; }
+
+
         public static Config DefualtConfig
         {
             get
@@ -40,12 +50,16 @@ namespace Echoer.Models
                 return new Config
                 {
                     Token = "<token>",
-                    EchoChannelID   = 0000,
-                    ArtChannelID    = 0000,
+                    EchoChannelID = 0000,
+                    ArtChannelID = 0000,
                     ReactionEmojiIDs = new List<ulong>(),
                     NeededPerm = Permissions.ManageChannels,
                     EchoedCache = 25,
-                    Status = "out for great art!" 
+                    Status = "out for great art!",
+                    Prefix = new List<string>(),
+                    WhiteListedUserIds = new List<ulong>(),
+                    EmbedColor = DiscordColor.Cyan.ToString(),
+                    UpdateBatPath = ""
                 };
             }
         }
