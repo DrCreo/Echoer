@@ -15,7 +15,7 @@ namespace Echoer.Commands
     {
 
         [Command("bat"), WhiteListed, Description("Updates the bot.")]
-        public async Task Bat(CommandContext ctx, [RemainingText ,Description("")] string batName)
+        public async Task Bat(CommandContext ctx, [RemainingText, Description("")] string batName)
         {
 
             try
@@ -68,7 +68,14 @@ namespace Echoer.Commands
         [Command("uploadlog"), WhiteListed, Description("uploads the log.")]
         public async Task UploadLog(CommandContext ctx)
         {
-            await ctx.RespondWithFileAsync("log.txt");
+            try
+            {
+                await ctx.RespondWithFileAsync("log.txt");
+            }
+            catch (Exception ex)
+            {
+                new LogWriter("Upload Log Command.\n" + ex.Message);
+            }
         }
     }
 }
