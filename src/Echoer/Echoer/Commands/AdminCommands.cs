@@ -9,6 +9,7 @@ using Echoer.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Reflection;
+using DSharpPlus.Entities;
 
 namespace Echoer.Commands
 {
@@ -37,6 +38,7 @@ namespace Echoer.Commands
                 }
 
                 await ctx.RespondAsync($"`Running `{batName}`");
+                await ctx.Client.UpdateStatusAsync(new DiscordActivity("the Updating game", ActivityType.Playing));
                 System.Diagnostics.Process.Start(bat);
             }
             catch (Exception ex)
