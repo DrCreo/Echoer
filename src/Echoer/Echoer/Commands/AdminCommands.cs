@@ -36,6 +36,7 @@ namespace Echoer.Commands
                     return;
                 }
 
+                await ctx.RespondAsync($"`Running `{batName}`");
                 System.Diagnostics.Process.Start(bat);
             }
             catch (Exception ex)
