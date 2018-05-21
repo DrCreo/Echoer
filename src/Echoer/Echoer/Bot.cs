@@ -233,7 +233,7 @@ namespace Echoer
                 LogLevel = LogLevel.Debug,
                 UseInternalLogHandler = true,
 
-                MessageCacheSize = 2048,
+                MessageCacheSize = 0,
 
 
                 Token = Config.Token,
