@@ -1,20 +1,21 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using Echoer.Models;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static DSharpPlus.Entities.DiscordEmbedBuilder;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using System.Reflection;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using Echoer.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using static DSharpPlus.Entities.DiscordEmbedBuilder;
 
 namespace Echoer
 {
@@ -31,7 +32,7 @@ namespace Echoer
         {
             // initialize the discord client
             await InitaliazeClientAsync();
-            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Initializing", DateTime.Now);
+            Client.Logger.Log(LogLevel.Information, "Bot", "Initializing", DateTime.Now);
 
             // initialize the echo cache and specify its size
             await LoadCache();
@@ -45,12 +46,12 @@ namespace Echoer
             Client.MessageReactionAdded += Client_MessageReactionAddedAsync;
             Client.Ready += Client_ReadyAsync;
 
-            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Connecting", DateTime.Now);
+            Client.Logger.Log(LogLevel.Information, "Bot", "Connecting", DateTime.Now);
 
             // connect the client
             await Client.ConnectAsync().ConfigureAwait(false);
 
-            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Connected", DateTime.Now);
+            Client.Logger.Log(LogLevel.Information, "Bot", "Connected", DateTime.Now);
 
             // block 
             await Task.Delay(-1);
@@ -75,7 +76,7 @@ namespace Echoer
 
         private async Task Client_ReadyAsync(ReadyEventArgs e)
         {
-            Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", "Ready!", DateTime.Now);
+            Client.Logger.Log(LogLevel.Information, "Bot", "Ready!", DateTime.Now);
 
             await Client.UpdateStatusAsync(new DiscordActivity(Config.Status, ActivityType.Watching));
         }
@@ -122,8 +123,8 @@ namespace Echoer
                 catch (Exception exc)
                 {
                     new LogWriter($"{exc.Message}\n{exc.StackTrace}\n\nAuthor ID:{msg.Author.Id}");
-                    Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", exc.Message, DateTime.Now);
-                    Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", "That user is nolonger present in this server", DateTime.Now);
+                    Client.Logger.Log(LogLevel.Error, "Bot", exc.Message, DateTime.Now);
+                    Client.Logger.Log(LogLevel.Error, "Bot", "That user is nolonger present in this server", DateTime.Now);
                     return;
                 }
 
@@ -141,7 +142,7 @@ namespace Echoer
                 catch (Exception ex)
                 {
                     imageUrl = "";
-                    Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
+                    Client.Logger.Log(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
                     new LogWriter($"{ex.Message}\n{ex.StackTrace}\n\nAuthor ID:{msg.Author.Id}");
                 }
 
@@ -195,15 +196,15 @@ namespace Echoer
                 catch (Exception ex)
                 {
                     new LogWriter($"{ex.Message}\n{ex.StackTrace}");
-                    Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
+                    Client.Logger.Log(LogLevel.Error, "Bot", ex.Message, DateTime.Now);
                 }
                 new LogWriter($"Messaged echoed.\n{msg.Content}\n{imageUrl}");
-                Client.DebugLogger.LogMessage(LogLevel.Info, "Bot", $"Messaged echoed.\n{msg.Content}\n{imageUrl}", DateTime.Now);
+                Client.Logger.Log(LogLevel.Information, "Bot", $"Messaged echoed.\n{msg.Content}\n{imageUrl}", DateTime.Now);
             }
             catch (Exception exc)
             {
                 new LogWriter($"{exc.Message}\n{exc.StackTrace}");
-                Client.DebugLogger.LogMessage(LogLevel.Error, "Bot", exc.Message, DateTime.Now);
+                Client.Logger.Log(LogLevel.Error, "Bot", exc.Message, DateTime.Now);
             }
         }
 
@@ -230,8 +231,7 @@ namespace Echoer
                 AutoReconnect = true,
 
                 LargeThreshold = 250,
-                LogLevel = LogLevel.Debug,
-                UseInternalLogHandler = true,
+                MinimumLogLevel = LogLevel.Debug,
 
                 MessageCacheSize = 0,
 
